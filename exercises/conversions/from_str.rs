@@ -4,12 +4,23 @@
 // You can read more about it at https://doc.rust-lang.org/std/str/trait.FromStr.html
 use std::error;
 use std::str::FromStr;
+use std::fmt;
 
 #[derive(Debug)]
 struct Person {
     name: String,
     age: usize,
 }
+
+#[derive(Debug, Clone)]
+struct InvalidStringError;
+impl fmt::Display for InvalidStringError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Invalid string")
+    }
+}
+
+impl std::error::Error for InvalidStringError {}
 
 // I AM NOT DONE
 
@@ -26,6 +37,13 @@ struct Person {
 impl FromStr for Person {
     type Err = Box<dyn error::Error>;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        // Would like to do that:
+        // let (name, age) = s.split_once(',')?;
+        if let Some((name, age)) = s.split_once(',') {
+            Ok(Person{name: String::from(name), age: age.parse::<usize>()?})
+        } else {
+            Err(InvalidStringError).into()
+        }
     }
 }
 
