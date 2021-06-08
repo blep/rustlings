@@ -13,16 +13,20 @@ struct Person {
 }
 
 #[derive(Debug, Clone)]
-struct InvalidStringError;
+enum InvalidStringError {
+    invalid
+}
+
 impl fmt::Display for InvalidStringError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Invalid string")
     }
 }
 
-impl std::error::Error for InvalidStringError {}
+impl std::error::Error for InvalidStringError {
 
-// I AM NOT DONE
+}
+
 
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
@@ -40,10 +44,11 @@ impl FromStr for Person {
         // Would like to do that:
         // let (name, age) = s.split_once(',')?;
         if let Some((name, age)) = s.split_once(',') {
-            Ok(Person{name: String::from(name), age: age.parse::<usize>()?})
-        } else {
-            Err(InvalidStringError).into()
+            if !name.is_empty() {
+                return Ok(Person{name: String::from(name), age: age.parse::<usize>()?});
+            }
         }
+        Err(Box::new(InvalidStringError::invalid))
     }
 }
 
